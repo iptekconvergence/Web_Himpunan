@@ -1,0 +1,225 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+html {
+    scroll-behavior: smooth;
+}
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-16px);
+    }
+}
+
+.animate-float {
+    animation: float 4s ease-in-out infinite;
+}
+
+/* ===== FUTURISTIC BACKGROUND SYSTEM ===== */
+
+/* Global body base */
+.futuristic-page {
+    background-color: #040d1a;
+    position: relative;
+}
+
+/* Shared canvas layer for all bg fx */
+.futuristic-page > .bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* Noise texture overlay */
+.futuristic-page > .bg-canvas::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.028;
+    mix-blend-mode: overlay;
+}
+
+/* Deep navy radial base gradient */
+.bg-radial-base {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(14, 42, 110, 0.55) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at 0% 50%, rgba(0, 20, 80, 0.4) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 100% 80%, rgba(0, 80, 160, 0.35) 0%, transparent 60%),
+        linear-gradient(180deg, #040d1a 0%, #050f22 40%, #040c1e 70%, #030a18 100%);
+}
+
+/* Corner glow accents */
+.bg-glow-tl {
+    position: absolute;
+    top: -10vh;
+    left: -10vw;
+    width: 55vw;
+    height: 55vw;
+    max-width: 700px;
+    max-height: 700px;
+    background: radial-gradient(circle, rgba(0, 100, 255, 0.13) 0%, transparent 65%);
+    border-radius: 50%;
+    filter: blur(40px);
+}
+
+.bg-glow-br {
+    position: absolute;
+    bottom: -10vh;
+    right: -10vw;
+    width: 55vw;
+    height: 55vw;
+    max-width: 700px;
+    max-height: 700px;
+    background: radial-gradient(circle, rgba(0, 180, 255, 0.10) 0%, transparent 65%);
+    border-radius: 50%;
+    filter: blur(48px);
+}
+
+.bg-glow-center {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60vw;
+    height: 40vh;
+    background: radial-gradient(ellipse, rgba(0, 60, 200, 0.09) 0%, transparent 70%);
+    filter: blur(60px);
+}
+
+.bg-glow-mid-right {
+    position: absolute;
+    top: 55%;
+    right: -5vw;
+    width: 40vw;
+    height: 40vw;
+    max-width: 500px;
+    max-height: 500px;
+    background: radial-gradient(circle, rgba(0, 220, 255, 0.07) 0%, transparent 65%);
+    border-radius: 50%;
+    filter: blur(50px);
+}
+
+/* Abstract SVG lines */
+.bg-abstract-lines {
+    position: absolute;
+    inset: 0;
+    opacity: 0.06;
+}
+
+/* Floating particles */
+@keyframes particle-drift-1 {
+    0%   { transform: translate(0, 0) scale(1); opacity: 0; }
+    10%  { opacity: 0.7; }
+    90%  { opacity: 0.4; }
+    100% { transform: translate(-60px, -200px) scale(0.4); opacity: 0; }
+}
+@keyframes particle-drift-2 {
+    0%   { transform: translate(0, 0) scale(1); opacity: 0; }
+    15%  { opacity: 0.6; }
+    85%  { opacity: 0.3; }
+    100% { transform: translate(80px, -250px) scale(0.3); opacity: 0; }
+}
+@keyframes particle-drift-3 {
+    0%   { transform: translate(0, 0) scale(1); opacity: 0; }
+    12%  { opacity: 0.5; }
+    88%  { opacity: 0.25; }
+    100% { transform: translate(-30px, -180px) scale(0.5); opacity: 0; }
+}
+@keyframes particle-drift-4 {
+    0%   { transform: translate(0, 0) scale(1); opacity: 0; }
+    20%  { opacity: 0.65; }
+    80%  { opacity: 0.3; }
+    100% { transform: translate(50px, -230px) scale(0.35); opacity: 0; }
+}
+@keyframes particle-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.4); opacity: 0.9; }
+}
+@keyframes slow-orbit {
+    0%   { transform: rotate(0deg) translateX(30px) rotate(0deg); }
+    100% { transform: rotate(360deg) translateX(30px) rotate(-360deg); }
+}
+
+.bg-particles {
+    position: absolute;
+    inset: 0;
+}
+
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(80, 180, 255, 0.9) 0%, rgba(0, 100, 255, 0.5) 50%, transparent 100%);
+}
+
+.particle-1  { width: 3px;  height: 3px;  top: 18%;  left: 12%;  animation: particle-drift-1 9s ease-in-out infinite; animation-delay: 0s; }
+.particle-2  { width: 2px;  height: 2px;  top: 75%;  left: 22%;  animation: particle-drift-2 12s ease-in-out infinite; animation-delay: -2s; }
+.particle-3  { width: 4px;  height: 4px;  top: 40%;  left: 80%;  animation: particle-drift-3 10s ease-in-out infinite; animation-delay: -4s; }
+.particle-4  { width: 2px;  height: 2px;  top: 60%;  left: 55%;  animation: particle-drift-4 11s ease-in-out infinite; animation-delay: -1s; }
+.particle-5  { width: 3px;  height: 3px;  top: 85%;  left: 70%;  animation: particle-drift-1 13s ease-in-out infinite; animation-delay: -6s; }
+.particle-6  { width: 2px;  height: 2px;  top: 25%;  left: 45%;  animation: particle-drift-2 8s ease-in-out infinite; animation-delay: -3s; }
+.particle-7  { width: 4px;  height: 4px;  top: 50%;  left: 5%;   animation: particle-drift-3 14s ease-in-out infinite; animation-delay: -5s; }
+.particle-8  { width: 2px;  height: 2px;  top: 10%;  left: 90%;  animation: particle-drift-4 10s ease-in-out infinite; animation-delay: -7s; }
+.particle-9  { width: 3px;  height: 3px;  top: 70%;  left: 35%;  animation: particle-drift-1 11s ease-in-out infinite; animation-delay: -1.5s; }
+.particle-10 { width: 2px;  height: 2px;  top: 32%;  left: 67%;  animation: particle-drift-2 9s ease-in-out infinite; animation-delay: -4.5s; }
+.particle-11 { width: 3px;  height: 3px;  top: 90%;  left: 88%;  animation: particle-drift-3 15s ease-in-out infinite; animation-delay: -8s; }
+.particle-12 { width: 2px;  height: 2px;  top: 5%;   left: 60%;  animation: particle-drift-4 12s ease-in-out infinite; animation-delay: -2.5s; }
+
+/* Bokeh large soft blobs */
+.bokeh {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(30px);
+    animation: particle-pulse 6s ease-in-out infinite;
+}
+.bokeh-1 { width: 80px; height: 80px; top: 20%; left: 15%;  background: rgba(0, 120, 255, 0.05); animation-delay: 0s; }
+.bokeh-2 { width: 120px; height: 120px; top: 65%; left: 75%; background: rgba(0, 200, 255, 0.04); animation-delay: -3s; }
+.bokeh-3 { width: 60px;  height: 60px;  top: 45%; left: 40%; background: rgba(60, 100, 255, 0.06); animation-delay: -1.5s; }
+.bokeh-4 { width: 90px;  height: 90px;  top: 80%; left: 25%; background: rgba(0, 150, 255, 0.04); animation-delay: -4s; }
+
+/* Section backgrounds for non-hero sections */
+.section-dark {
+    background: transparent;
+    position: relative;
+}
+
+.section-semi {
+    background: rgba(5, 15, 40, 0.55);
+    position: relative;
+    backdrop-filter: blur(0px);
+}
+
+/* Make all page content sit above the fixed bg */
+.futuristic-page > *:not(.bg-canvas) {
+    position: relative;
+    z-index: 1;
+}
+
+/* Override section-level backgrounds */
+.futuristic-page .section-about {
+    background: rgba(8, 20, 55, 0.7);
+}
+
+.futuristic-page .section-divisi {
+    background: rgba(4, 12, 30, 0.5);
+}
+
+.futuristic-page .section-berita {
+    background: rgba(8, 20, 55, 0.7);
+}
+
+.futuristic-page .section-contact {
+    background: rgba(4, 12, 30, 0.5);
+}
+
+.futuristic-page .section-footer {
+    background: rgba(2, 8, 25, 0.85);
+    border-top: 1px solid rgba(0, 80, 200, 0.2);
+}
