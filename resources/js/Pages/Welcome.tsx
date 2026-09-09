@@ -352,9 +352,9 @@ export default function Welcome({
                             )}
                         </div>
                         <div className={`mt-16 flex justify-center transition-all duration-700 delay-500 ease-out ${beritaInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-                            <a href="#Berita" className="text-sm font-semibold leading-6 text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-2 group">
+                            <Link href="/berita" className="text-sm font-semibold leading-6 text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-2 group">
                                 Lihat semua berita <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">&rarr;</span>
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </section>
