@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PeriodController;
-use App\Http\Controllers\NewsController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -67,13 +66,27 @@ Route::get('/dashboard', function () {
             'total_periode' => \App\Models\Period::count(),
             'total_berita' => \App\Models\News::count(),
             'total_admin' => \App\Models\User::count(),
-        ]
+        ],
+        'recentMembers' => \App\Models\Member::with('division')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get(),
+        'recentNews' => \App\Models\News::with('category')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get(),
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [\App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
+    Route::post('/footer-links', [\App\Http\Controllers\Admin\FooterLinkController::class, 'store'])->name('footer-links.store');
+    Route::put('/footer-links/{footerLink}', [\App\Http\Controllers\Admin\FooterLinkController::class, 'update'])->name('footer-links.update');
+    Route::delete('/footer-links/{footerLink}', [\App\Http\Controllers\Admin\FooterLinkController::class, 'destroy'])->name('footer-links.destroy');
+    Route::post('/footer-link-groups', [\App\Http\Controllers\Admin\FooterLinkGroupController::class, 'store'])->name('footer-link-groups.store');
+    Route::put('/footer-link-groups/{footerLinkGroup}', [\App\Http\Controllers\Admin\FooterLinkGroupController::class, 'update'])->name('footer-link-groups.update');
+    Route::delete('/footer-link-groups/{footerLinkGroup}', [\App\Http\Controllers\Admin\FooterLinkGroupController::class, 'destroy'])->name('footer-link-groups.destroy');
     Route::get('/landing', [\App\Http\Controllers\Admin\LandingController::class, 'index'])->name('landing.index');
     Route::post('/landing/hero', [\App\Http\Controllers\Admin\LandingController::class, 'updateHero'])->name('landing.hero');
     Route::post('/landing/about', [\App\Http\Controllers\Admin\LandingController::class, 'updateAbout'])->name('landing.about');
@@ -119,7 +132,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/berita', [NewsController::class, 'index'])->name('berita.index');
-Route::get('/berita/{slug}', [NewsController::class, 'show'])->name('berita.show');
+// Berita & Kegiatan
+Route::get('/berita', [\App\Http\Controllers\NewsController::class, 'index'])->name('berita.index');
+Route::get('/berita/{slug}', [\App\Http\Controllers\NewsController::class, 'show'])->name('berita.show');
 
 require __DIR__.'/auth.php';

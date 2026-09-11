@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 
 const styles = {
   wrapper: {
-    display: 'block' as const,
+    display: 'inline-block' as const,
     position: 'relative' as const,
     width: '100%',
   },
@@ -340,9 +340,9 @@ export default function DecryptedText({
       : {};
 
   return (
-    <motion.div
+    <motion.span
       className={parentClassName}
-      ref={containerRef as React.RefObject<HTMLDivElement>}
+      ref={containerRef}
       style={styles.wrapper}
       {...animateProps}
       {...props}
@@ -351,9 +351,11 @@ export default function DecryptedText({
       <span style={styles.srOnly}>{text}</span>
 
       {/* Ghost text: invisible, full-width block — reserves exact height so layout never shifts */}
-      <div
+      <span
         aria-hidden="true"
         style={{
+          display: 'inline-block',
+          width: '100%',
           visibility: 'hidden',
           userSelect: 'none',
           pointerEvents: 'none',
@@ -362,12 +364,13 @@ export default function DecryptedText({
         }}
       >
         {text}
-      </div>
+      </span>
 
       {/* Animated text: absolutely fills the ghost div space */}
-      <div
+      <span
         aria-hidden="true"
         style={{
+          display: 'inline-block',
           position: 'absolute',
           top: 0,
           left: 0,
@@ -384,7 +387,7 @@ export default function DecryptedText({
             </span>
           );
         })}
-      </div>
-    </motion.div>
+      </span>
+    </motion.span>
   );
 }

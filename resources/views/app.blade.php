@@ -7,7 +7,10 @@
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- Favicon -->
-        <link rel="icon" type="image/png" href="/img/logo_hmpsmi.png" />
+        @php
+            $siteLogo = \App\Models\Setting::where('key', 'logo')->value('value') ?: '/img/logo_hmpsmi.png';
+        @endphp
+        <link rel="icon" type="image/png" href="{{ $siteLogo }}" />
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">

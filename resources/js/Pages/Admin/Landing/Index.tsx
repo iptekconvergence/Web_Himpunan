@@ -256,7 +256,7 @@ export default function LandingIndex({ settings, missions, flash }: Props) {
                     </div>
 
                     <div className="pt-4 border-t border-slate-100">
-                        <InputLabel value="Logo Divisi" />
+                        <InputLabel value="Logo Kabinet" />
                         <div className="mt-2 flex items-start gap-6">
                             <div className="w-64 h-40 rounded-xl border border-slate-200 bg-slate-100 flex items-center justify-center overflow-hidden">
                                 {aboutImgPreview ? (

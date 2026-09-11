@@ -45,13 +45,18 @@ export function FlipCard({ data }: FlipCardProps) {
               <h2 className="text-xl font-bold text-white tracking-wide leading-tight drop-shadow-md">
                 {data.name}
               </h2>
-              <div className="mt-2 flex flex-col gap-0.5 items-center">
-                <p className="text-[14px] font-semibold text-[rgba(255,255,255,0.9)] drop-shadow-sm">
+              <div className="mt-2 flex flex-col gap-0.5 items-center text-center">
+                <p className="text-[14px] font-semibold text-[rgba(255,255,255,0.9)] drop-shadow-sm text-center">
                   {data.username}
                 </p>
-                <p className="text-[11px] font-medium text-[rgba(255,255,255,0.7)]">
-                  Periode {data.periodName || '2025–2026'} {data.nim ? `• NIM: ${data.nim}` : ''}
+                <p className="text-[11px] font-medium text-[rgba(255,255,255,0.7)] text-center leading-tight">
+                  Periode {data.periodName || '2025–2026'}
                 </p>
+                {data.nim && (
+                  <p className="text-[11px] font-medium text-[rgba(255,255,255,0.7)] text-center leading-tight">
+                    NIM: {data.nim}
+                  </p>
+                )}
               </div>
             </div>
             
@@ -70,27 +75,27 @@ export function FlipCard({ data }: FlipCardProps) {
         </div>
         
         {/* Back Face */}
-        <div className="absolute inset-0 h-full w-full rounded-[24px] bg-gradient-to-br from-[#5B3E93] to-slate-900 px-6 py-8 text-white [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-between shadow-2xl overflow-hidden">
+        <div className="absolute inset-0 h-full w-full rounded-[24px] bg-gradient-to-br from-[#5B3E93] to-slate-900 px-6 py-8 text-white [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-between items-center text-center shadow-2xl overflow-hidden">
           
           {/* Decorative glow */}
           <div className="absolute -top-16 -right-16 w-48 h-48 bg-purple-500 rounded-full blur-[60px] opacity-30 pointer-events-none"></div>
           <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-indigo-500 rounded-full blur-[60px] opacity-20 pointer-events-none"></div>
 
           {/* Name & Role */}
-          <div className="text-center z-10">
-            <h3 className="font-bold text-lg leading-tight">{data.name}</h3>
-            <p className="text-sm text-purple-300 mt-1 font-medium">{data.username}</p>
+          <div className="text-center z-10 w-full flex flex-col items-center">
+            <h3 className="font-bold text-lg leading-tight text-center">{data.name}</h3>
+            <p className="text-sm text-purple-300 mt-1 font-medium text-center">{data.username}</p>
           </div>
 
           {/* Bio */}
-          <div className="z-10 flex-grow flex items-center">
-            <p className="text-sm text-white/80 text-center leading-relaxed line-clamp-5">
+          <div className="z-10 flex-grow w-full flex flex-col justify-center items-center text-center px-1">
+            <p className="text-sm text-white/80 text-center leading-relaxed line-clamp-5 w-full">
               {data.bio}
             </p>
           </div>
 
           {/* Instagram Link */}
-          <div className="z-10">
+          <div className="z-10 w-full flex justify-center">
             <a
               href={data.socialLinks.instagram && data.socialLinks.instagram !== '#' ? data.socialLinks.instagram : undefined}
               target="_blank"

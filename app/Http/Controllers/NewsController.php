@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\News;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,7 +21,7 @@ class NewsController extends Controller
         ]);
     }
 
-    public function show($slug)
+    public function show(string $slug)
     {
         $newsItem = News::with('category')
             ->where('slug', $slug)
@@ -31,12 +32,13 @@ class NewsController extends Controller
             ->where('status', 'published')
             ->where('id', '!=', $newsItem->id)
             ->orderBy('published_at', 'desc')
-            ->take(3)
+            ->take(5)
             ->get();
 
         return Inertia::render('Berita/Show', [
             'news' => $newsItem,
             'relatedNews' => $relatedNews,
+            'latestNews' => $relatedNews,
         ]);
     }
 }

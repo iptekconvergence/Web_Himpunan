@@ -15,7 +15,7 @@ class NewsController extends Controller
     public function index()
     {
         $categories = NewsCategory::orderBy('name')->get();
-        $articles = News::with('category')->orderBy('id', 'desc')->get();
+        $articles = News::with('category')->orderBy('id', 'desc')->paginate(15);
 
         return Inertia::render('Admin/News/Index', [
             'categories' => $categories,
@@ -66,10 +66,11 @@ class NewsController extends Controller
             'content'          => 'required|string',
             'status'           => 'required|in:draft,published',
             'thumbnail'        => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'published_at'     => 'nullable|date',
         ]);
 
-        $data['slug'] = Str::slug($data['title']) . '-' . time();
-        if ($data['status'] === 'published') {
+        $data['slug'] = $this->generateUniqueSlug($data['title']);
+        if ($data['status'] === 'published' && empty($data['published_at'])) {
             $data['published_at'] = now();
         }
 
@@ -94,11 +95,15 @@ class NewsController extends Controller
             'content'          => 'required|string',
             'status'           => 'required|in:draft,published',
             'thumbnail'        => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'published_at'     => 'nullable|date',
         ]);
 
-        $data['slug'] = Str::slug($data['title']) . '-' . $news->id;
+        // Only regenerate slug if title actually changed
+        if ($data['title'] !== $news->title) {
+            $data['slug'] = $this->generateUniqueSlug($data['title'], $news->id);
+        }
         
-        if ($data['status'] === 'published' && !$news->published_at) {
+        if ($data['status'] === 'published' && empty($data['published_at']) && !$news->published_at) {
             $data['published_at'] = now();
         }
 
@@ -113,6 +118,37 @@ class NewsController extends Controller
 
         $news->update($data);
         return redirect()->back()->with('message', 'Artikel berhasil diubah!');
+    }
+
+    /**
+     * Generate a unique slug from a title.
+     * Checks existing slugs in the database and appends a numeric suffix if needed.
+     */
+    private function generateUniqueSlug(string $title, ?int $excludeId = null): string
+    {
+        $slug = Str::slug($title);
+        
+        $query = News::where('slug', $slug);
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+        
+        if (!$query->exists()) {
+            return $slug;
+        }
+        
+        // Slug exists, append incrementing number
+        $counter = 1;
+        do {
+            $newSlug = $slug . '-' . $counter;
+            $existsQuery = News::where('slug', $newSlug);
+            if ($excludeId) {
+                $existsQuery->where('id', '!=', $excludeId);
+            }
+            $counter++;
+        } while ($existsQuery->exists());
+        
+        return $newSlug;
     }
 
     /**

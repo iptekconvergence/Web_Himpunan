@@ -59,7 +59,10 @@ export default function Navbar({ transparent = false, wrapperClassName = '' }: N
                 {/* Logo on the left */}
                 <div className="flex items-center gap-6">
                     <Link href="/" className="flex items-center gap-2 group">
-                        <ApplicationLogo className="h-10 w-auto fill-current transition-transform duration-300 group-hover:scale-105 text-cyan-400" />
+                        <ApplicationLogo 
+                            src={global_settings?.logo || global_settings?.logo_url}
+                            className="h-10 w-auto transition-transform duration-300 group-hover:scale-105" 
+                        />
                         <div className="flex flex-col justify-center">
                             <span className="font-extrabold text-lg leading-tight tracking-wide transition-colors text-white group-hover:text-cyan-300">
                                 {global_settings?.site_name || 'HMPS MI'}

@@ -33,12 +33,15 @@ export default function Welcome({
     auth,
     laravelVersion,
     phpVersion,
-    settings,
+    settings: initialSettings = {},
     missions,
     divisions,
     news,
     activePeriod,
-}: PageProps<{ laravelVersion: string; phpVersion: string; settings: Record<string, string>; missions: Mission[]; divisions: Division[]; news: NewsArticle[]; activePeriod?: { id: number; name: string } | null; }>) {
+    global_settings = {},
+    global_footer_links,
+}: PageProps<{ laravelVersion: string; phpVersion: string; settings?: Record<string, string>; missions: Mission[]; divisions: Division[]; news: NewsArticle[]; activePeriod?: { id: number; name: string } | null; }>) {
+    const settings = { ...(global_settings || {}), ...(initialSettings || {}) };
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
@@ -52,7 +55,7 @@ export default function Welcome({
 
     return (
         <>
-            <Head title="HMPS MI Politeknik Negeri Medan" />
+            <Head title={`${settings.site_name || 'HMPS MI'} ${settings.campus_name || 'Politeknik Negeri Medan'}`} />
             
             <div className="futuristic-page min-h-screen font-sans text-slate-100 selection:bg-indigo-500 selection:text-white">
 
@@ -429,7 +432,7 @@ export default function Welcome({
                         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
                             <div className="space-y-8 xl:col-span-1">
                                 <div className="flex items-center gap-3">
-                                    <ApplicationLogo className="h-10 w-auto text-indigo-400 fill-current" />
+                                    <ApplicationLogo src={settings.logo || settings.logo_url} className="h-10 w-auto text-indigo-400" />
                                     <div className="flex flex-col">
                                         <span className="font-extrabold text-lg leading-tight tracking-wide text-white">{settings.site_name || "HMPS MI"}</span>
                                         <span className="text-xs font-semibold leading-tight text-slate-400 tracking-wider uppercase">{settings.campus_name || "Politeknik Negeri Medan"}</span>
@@ -466,45 +469,48 @@ export default function Welcome({
                                 </div>
                             </div>
                             <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
-                                <div className="md:grid md:grid-cols-2 md:gap-8">
-                                    <div>
-                                        <h3 className="text-sm font-semibold leading-6 text-slate-200">Organisasi</h3>
-                                        <ul role="list" className="mt-6 space-y-4">
-                                            <li><a href="#about" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Tentang Kami</a></li>
-                                            <li><a href="#Kepengurusan" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Kepengurusan</a></li>
-                                            <li><a href="#Divisi" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Divisi Utama</a></li>
-                                            <li><a href="#Berita" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Berita & Kegiatan</a></li>
-                                        </ul>
-                                    </div>
-                                    <div className="mt-10 md:mt-0">
-                                        <h3 className="text-sm font-semibold leading-6 text-slate-200">Mahasiswa</h3>
-                                        <ul role="list" className="mt-6 space-y-4">
-                                            <li><a href="#" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Panduan Akademik</a></li>
-                                            <li><a href="#" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Jadwal Kuliah</a></li>
-                                            <li><a href="#" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Lomba & Prestasi</a></li>
-                                            <li><a href="#" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Alumni</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div className="md:grid md:grid-cols-2 md:gap-8">
-                                    <div>
-                                        <h3 className="text-sm font-semibold leading-6 text-slate-200">Resources</h3>
-                                        <ul role="list" className="mt-6 space-y-4">
-                                            <li><a href="#" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Help Center</a></li>
-                                            <li><a href="#" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Docs & Tutorials</a></li>
-                                            <li><a href="#" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Community</a></li>
-                                            <li><a href="#" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Assets</a></li>
-                                        </ul>
-                                    </div>
-                                    <div className="mt-10 md:mt-0">
-                                        <h3 className="text-sm font-semibold leading-6 text-slate-200">Legal</h3>
-                                        <ul role="list" className="mt-6 space-y-4">
-                                            <li><a href="#" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Privacy Policy</a></li>
-                                            <li><a href="#" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Terms of Service</a></li>
-                                            <li><a href="#" className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">Cookie Policy</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
+                                {(() => {
+                                    const groups = global_footer_links || [];
+                                    const midpoint = Math.ceil(groups.length / 2);
+                                    const firstHalf = groups.slice(0, midpoint);
+                                    const secondHalf = groups.slice(midpoint);
+                                    return (
+                                        <>
+                                            <div className="md:grid md:grid-cols-2 md:gap-8">
+                                                {firstHalf.map((group: any, gIdx: number) => (
+                                                    <div key={group.id || gIdx} className={gIdx > 0 ? 'mt-10 md:mt-0' : ''}>
+                                                        <h3 className="text-sm font-semibold leading-6 text-slate-200">{group.label}</h3>
+                                                        <ul role="list" className="mt-6 space-y-4">
+                                                            {(group.links || []).map((item: any, idx: number) => (
+                                                                <li key={item.id || idx}>
+                                                                    <a href={item.url} className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">
+                                                                        {item.label}
+                                                                    </a>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="md:grid md:grid-cols-2 md:gap-8">
+                                                {secondHalf.map((group: any, gIdx: number) => (
+                                                    <div key={group.id || gIdx} className={gIdx > 0 ? 'mt-10 md:mt-0' : ''}>
+                                                        <h3 className="text-sm font-semibold leading-6 text-slate-200">{group.label}</h3>
+                                                        <ul role="list" className="mt-6 space-y-4">
+                                                            {(group.links || []).map((item: any, idx: number) => (
+                                                                <li key={item.id || idx}>
+                                                                    <a href={item.url} className="text-sm leading-6 text-slate-400 hover:text-cyan-400 transition-colors">
+                                                                        {item.label}
+                                                                    </a>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </>
+                                    );
+                                })()}
                             </div>
                         </div>
                         <div className="mt-16 border-t border-white/10 pt-8 sm:mt-20 lg:mt-24">
