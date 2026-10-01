@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PeriodController;
+use App\Http\Controllers\NewsController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -133,7 +134,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Berita & Kegiatan
-Route::get('/berita', [\App\Http\Controllers\NewsController::class, 'index'])->name('berita.index');
-Route::get('/berita/{slug}', [\App\Http\Controllers\NewsController::class, 'show'])->name('berita.show');
+Route::get('/berita', [NewsController::class, 'index'])->name('berita.index');
+Route::get('/berita/{slug}', [NewsController::class, 'show'])->name('berita.show');
 
 require __DIR__.'/auth.php';
