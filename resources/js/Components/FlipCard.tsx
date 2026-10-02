@@ -8,6 +8,9 @@ export interface FlipCardProps {
     bio: string;
     periodName?: string;
     nim?: string;
+    photoPositionX?: number;
+    photoPositionY?: number;
+    photoZoom?: number;
     stats?: {
       following?: number | string;
       followers?: number | string;
@@ -22,7 +25,11 @@ export interface FlipCardProps {
   };
 }
 
-export function FlipCard({ data }: FlipCardProps) {
+export const FlipCard = React.memo(function FlipCard({ data }: FlipCardProps) {
+  const posX = data.photoPositionX ?? 50;
+  const posY = data.photoPositionY ?? 50;
+  const zoom = data.photoZoom ?? 100;
+
   return (
     <div className="group h-[380px] w-full max-w-[300px] [perspective:1000px] mx-auto cursor-pointer">
       <div className="relative h-full w-full rounded-[24px] shadow-lg transition-all duration-700 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)] group-hover:shadow-2xl group-hover:scale-[1.02]">
@@ -32,7 +39,6 @@ export function FlipCard({ data }: FlipCardProps) {
           
           {/* Background Layer */}
           <div className="absolute inset-0 h-full w-full rounded-[24px] bg-gradient-to-br from-[#4F46E5] to-[#0F172A] shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)]">
-            {/* Subtle glow & abstract pattern */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 via-transparent to-black/60 mix-blend-overlay"></div>
             <div className="absolute -top-24 -left-24 w-64 h-64 bg-[#2563EB] rounded-full blur-[80px] opacity-40"></div>
           </div>
@@ -40,12 +46,12 @@ export function FlipCard({ data }: FlipCardProps) {
           {/* Content Layer */}
           <div className="absolute inset-0 flex flex-col h-full w-full">
             
-            {/* Top Info Section - compact, tight to top */}
-            <div className="flex flex-col items-center z-10 px-4 text-center pt-6">
+            {/* Top Info Section */}
+            <div className="shrink-0 flex flex-col items-center z-10 px-4 text-center pt-5 pb-3">
               <h2 className="text-xl font-bold text-white tracking-wide leading-tight drop-shadow-md">
                 {data.name}
               </h2>
-              <div className="mt-2 flex flex-col gap-0.5 items-center text-center">
+              <div className="mt-1.5 flex flex-col gap-0.5 items-center text-center">
                 <p className="text-[14px] font-semibold text-[rgba(255,255,255,0.9)] drop-shadow-sm text-center">
                   {data.username}
                 </p>
@@ -65,12 +71,16 @@ export function FlipCard({ data }: FlipCardProps) {
               <img 
                 src={data.image} 
                 alt={data.name} 
-                className="absolute bottom-0 h-[270px] w-auto max-w-full object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)] z-20 pointer-events-none" 
+                className="absolute bottom-0 h-[270px] w-auto max-w-full object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)] z-20 pointer-events-none"
+                style={{ 
+                  objectPosition: `${posX}% ${posY}%`,
+                  transform: `scale(${zoom / 100})`,
+                  transformOrigin: 'bottom center'
+                }}
               />
+              {/* Glass highlight at the bottom edge */}
+              <div className="absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-black/40 to-transparent rounded-b-[24px] pointer-events-none z-30"></div>
             </div>
-            
-            {/* Glass highlight at the bottom edge */}
-            <div className="absolute bottom-0 inset-x-0 h-10 bg-gradient-to-t from-black/40 to-transparent rounded-b-[24px] pointer-events-none z-10"></div>
           </div>
         </div>
         
@@ -113,4 +123,4 @@ export function FlipCard({ data }: FlipCardProps) {
       </div>
     </div>
   );
-}
+});
