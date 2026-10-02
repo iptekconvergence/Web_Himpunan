@@ -19,6 +19,9 @@ interface Member {
     nim: string | null;
     role_name: string;
     photo_path: string | null;
+    photo_position_x: number | null;
+    photo_position_y: number | null;
+    photo_zoom: number | null;
     bio: string | null;
     instagram_url: string | null;
 }
@@ -96,6 +99,9 @@ export default function PeriodMembers({
                                             periodName: period.name,
                                             nim: member.nim || undefined,
                                             image: member.photo_path || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=e2e8f0&color=475569&size=256`,
+                                            photoPositionX: member.photo_position_x ?? 50,
+                                            photoPositionY: member.photo_position_y ?? 50,
+                                            photoZoom: member.photo_zoom ?? 100,
                                             bio: member.bio || `Bertugas sebagai ${member.role_name} HMPS MI untuk masa jabatan Periode ${period.name}.`,
                                             stats: { 
                                                 posts: 0, 

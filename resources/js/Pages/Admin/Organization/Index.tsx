@@ -1,15 +1,16 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, router } from '@inertiajs/react';
-import { FormEventHandler, useState, useRef, useEffect } from 'react';
+import { FormEventHandler, useState, useRef, useEffect, useMemo } from 'react';
 import TextInput from '@/Components/TextInput';
 import InputLabel from '@/Components/InputLabel';
 import InputError from '@/Components/InputError';
 import PrimaryButton from '@/Components/PrimaryButton';
 import Modal from '@/Components/Modal';
+import { FlipCard } from '@/Components/FlipCard';
 
 interface Period { id: number; name: string; is_active: boolean; notes: string | null; }
 interface Division { id: number; period_id?: number | null; name: string; slug: string; icon: string | null; description: string | null; sort_order: number; is_active: boolean; period?: Period; }
-interface Member { id: number; period_id: number; division_id: number; name: string; nim?: string | null; role_name: string; bio: string | null; photo_path: string | null; instagram_url: string | null; sort_order: number; is_active: boolean; period?: Period; division?: Division; }
+interface Member { id: number; period_id: number; division_id: number; name: string; nim?: string | null; role_name: string; bio: string | null; photo_path: string | null; photo_position_x: number; photo_position_y: number; photo_zoom: number; instagram_url: string | null; sort_order: number; is_active: boolean; period?: Period; division?: Division; }
 
 interface Props {
     periods: Period[];
@@ -106,10 +107,60 @@ export default function OrganizationIndex({ periods, divisions, members, flash }
         sort_order: 0,
         is_active: true,
         photo: null as File | null,
+        photo_position_x: 50,
+        photo_position_y: 50,
+        photo_zoom: 100,
         _method: 'post'
     });
     const [memPhotoPreview, setMemPhotoPreview] = useState<string | null>(null);
     const memPhotoRef = useRef<HTMLInputElement>(null);
+
+    // Debounced Preview State to prevent typing lag
+    const [previewData, setPreviewData] = useState({
+        name: '',
+        role_name: '',
+        nim: '',
+        bio: '',
+        instagram_url: '',
+    });
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setPreviewData({
+                name: memData.name,
+                role_name: memData.role_name,
+                nim: memData.nim || '',
+                bio: memData.bio || '',
+                instagram_url: memData.instagram_url || '',
+            });
+        }, 150);
+
+        return () => clearTimeout(timer);
+    }, [memData.name, memData.role_name, memData.nim, memData.bio, memData.instagram_url]);
+
+    const liveCardData = useMemo(() => {
+        const trimmedName = previewData.name.trim();
+        const trimmedRole = previewData.role_name.trim();
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(trimmedName || 'Pengurus')}&background=e2e8f0&color=475569&size=256`;
+        
+        return {
+            name: trimmedName || 'Nama Pengurus',
+            username: trimmedRole || 'Jabatan / Role',
+            periodName: selectedPeriod?.name || '2025–2026',
+            nim: previewData.nim.trim() ? previewData.nim.trim() : undefined,
+            image: memPhotoPreview || fallbackAvatar,
+            photoPositionX: memData.photo_position_x,
+            photoPositionY: memData.photo_position_y,
+            photoZoom: memData.photo_zoom,
+            bio: previewData.bio.trim() || `Bertugas sebagai ${trimmedRole || 'Pengurus'} HMPS MI untuk masa jabatan Periode ${selectedPeriod?.name || '-'}.`,
+            stats: { posts: 0, followers: 0, following: 0 },
+            socialLinks: {
+                github: '#',
+                twitter: '#',
+                instagram: previewData.instagram_url.trim() || '#'
+            }
+        };
+    }, [previewData, memPhotoPreview, memData.photo_position_x, memData.photo_position_y, memData.photo_zoom, selectedPeriod?.name]);
 
     const openMemberModal = (mem?: Member) => {
         if (!selectedPeriodId) {
@@ -118,17 +169,44 @@ export default function OrganizationIndex({ periods, divisions, members, flash }
         }
         if (mem) { 
             setEditingMember(mem); 
-            setMemData({ period_id: mem.period_id, division_id: mem.division_id, name: mem.name, nim: mem.nim || '', role_name: mem.role_name, bio: mem.bio || '', instagram_url: mem.instagram_url || '', sort_order: mem.sort_order, is_active: mem.is_active, photo: null, _method: 'post' }); 
+            setMemData({ period_id: mem.period_id, division_id: mem.division_id, name: mem.name, nim: mem.nim || '', role_name: mem.role_name, bio: mem.bio || '', instagram_url: mem.instagram_url || '', sort_order: mem.sort_order, is_active: mem.is_active, photo: null, photo_position_x: mem.photo_position_x ?? 50, photo_position_y: mem.photo_position_y ?? 50, photo_zoom: mem.photo_zoom ?? 100, _method: 'post' }); 
             setMemPhotoPreview(mem.photo_path);
+            setPreviewData({
+                name: mem.name,
+                role_name: mem.role_name,
+                nim: mem.nim || '',
+                bio: mem.bio || '',
+                instagram_url: mem.instagram_url || '',
+            });
         }
         else { 
             setEditingMember(null); 
-            setMemData({ period_id: selectedPeriodId, division_id: filteredDivisions[0]?.id || '', name: '', nim: '', role_name: '', bio: '', instagram_url: '', sort_order: filteredMembers.length + 1, is_active: true, photo: null, _method: 'post' }); 
+            setMemData({ period_id: selectedPeriodId, division_id: filteredDivisions[0]?.id || '', name: '', nim: '', role_name: '', bio: '', instagram_url: '', sort_order: filteredMembers.length + 1, is_active: true, photo: null, photo_position_x: 50, photo_position_y: 50, photo_zoom: 100, _method: 'post' }); 
             setMemPhotoPreview(null);
+            setPreviewData({
+                name: '',
+                role_name: '',
+                nim: '',
+                bio: '',
+                instagram_url: '',
+            });
         }
         setIsMemberModalOpen(true);
     };
-    const closeMemberModal = () => { setIsMemberModalOpen(false); resetMem(); setEditingMember(null); };
+    const closeMemberModal = () => { 
+        setIsMemberModalOpen(false); 
+        resetMem(); 
+        setEditingMember(null); 
+        setMemPhotoPreview(null);
+    };
+
+    const handlePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setMemData('photo', file);
+            setMemPhotoPreview(URL.createObjectURL(file));
+        }
+    };
 
     const submitMember: FormEventHandler = (e) => {
         e.preventDefault();
@@ -789,78 +867,203 @@ export default function OrganizationIndex({ periods, divisions, members, flash }
             </Modal>
 
             {/* Member Modal (Locked to Selected Period & Filtered Divisions) */}
-            <Modal show={isMemberModalOpen} onClose={closeMemberModal} maxWidth="2xl">
-                <form onSubmit={submitMember} className="p-6">
-                    <h2 className="text-lg font-bold text-slate-900 mb-6">
-                        {editingMember ? 'Edit Pengurus' : `Tambah Pengurus (Periode ${selectedPeriod?.name})`}
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-4">
-                            <div className="bg-purple-50 p-3 rounded-xl border border-purple-100 text-xs font-semibold text-[#5B3E93]">
-                                Terikat pada Periode: <span className="font-bold">{selectedPeriod?.name}</span>
-                            </div>
-                            <div>
-                                <InputLabel htmlFor="m_name" value="Nama Lengkap" />
-                                <TextInput id="m_name" className="mt-1 block w-full rounded-xl" value={memData.name} onChange={e => setMemData('name', e.target.value)} required />
-                                <InputError message={memErrors.name} className="mt-1" />
-                            </div>
-                            <div>
-                                <InputLabel htmlFor="m_nim" value="NIM (Nomor Induk Mahasiswa)" />
-                                <TextInput id="m_nim" className="mt-1 block w-full rounded-xl" value={memData.nim} onChange={e => setMemData('nim', e.target.value)} placeholder="Contoh: 2105111001" />
-                                <InputError message={memErrors.nim} className="mt-1" />
-                            </div>
-                            <div>
-                                <InputLabel htmlFor="m_role" value="Jabatan" />
-                                <TextInput id="m_role" className="mt-1 block w-full rounded-xl" value={memData.role_name} onChange={e => setMemData('role_name', e.target.value)} required />
-                                <InputError message={memErrors.role_name} className="mt-1" />
-                            </div>
-                            <div>
-                                <InputLabel htmlFor="m_div" value={`Divisi (${selectedPeriod?.name})`} />
-                                <select id="m_div" className="mt-1 block w-full border-slate-200 rounded-xl shadow-sm focus:border-[#5B3E93] focus:ring-[#5B3E93]" value={memData.division_id} onChange={e => setMemData('division_id', e.target.value)} required>
-                                    <option value="">Pilih Divisi...</option>
-                                    {filteredDivisions.map(d => (
-                                        <option key={d.id} value={d.id}>{d.name}</option>
-                                    ))}
-                                </select>
-                                <InputError message={memErrors.division_id} className="mt-1" />
-                            </div>
-                            <div>
-                                <InputLabel htmlFor="m_bio" value="Bio Singkat" />
-                                <textarea id="m_bio" className="mt-1 block w-full border-slate-200 rounded-xl shadow-sm focus:border-[#5B3E93] focus:ring-[#5B3E93]" rows={2} value={memData.bio} onChange={e => setMemData('bio', e.target.value)} />
+            {/* Member Modal (Locked to Selected Period & Filtered Divisions) */}
+            <Modal show={isMemberModalOpen} onClose={closeMemberModal} maxWidth="5xl">
+                <form onSubmit={submitMember} className="p-6 sm:p-7">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+                        <div>
+                            <h2 className="text-lg font-bold text-slate-900">
+                                {editingMember ? 'Edit Pengurus' : `Tambah Pengurus (Periode ${selectedPeriod?.name})`}
+                            </h2>
+                            <p className="text-xs text-slate-500 mt-0.5">
+                                Kelola profil dan foto anggota yang akan ditampilkan di card organisasi.
+                            </p>
+                        </div>
+                        <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-50 text-[#5B3E93] border border-purple-100">
+                            Periode {selectedPeriod?.name}
+                        </span>
+                    </div>
+
+                    <div className="flex flex-col lg:flex-row gap-8 items-start">
+                        {/* Form Inputs (Left side on desktop) */}
+                        <div className="flex-1 w-full">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                    <div className="bg-purple-50 p-3 rounded-xl border border-purple-100 text-xs font-semibold text-[#5B3E93]">
+                                        Terikat pada Periode: <span className="font-bold">{selectedPeriod?.name}</span>
+                                    </div>
+                                    <div>
+                                        <InputLabel htmlFor="m_name" value="Nama Lengkap" />
+                                        <TextInput id="m_name" className="mt-1 block w-full rounded-xl" value={memData.name} onChange={e => setMemData('name', e.target.value)} required />
+                                        <InputError message={memErrors.name} className="mt-1" />
+                                    </div>
+                                    <div>
+                                        <InputLabel htmlFor="m_nim" value="NIM (Nomor Induk Mahasiswa)" />
+                                        <TextInput id="m_nim" className="mt-1 block w-full rounded-xl" value={memData.nim} onChange={e => setMemData('nim', e.target.value)} placeholder="Contoh: 2105111001" />
+                                        <InputError message={memErrors.nim} className="mt-1" />
+                                    </div>
+                                    <div>
+                                        <InputLabel htmlFor="m_role" value="Jabatan" />
+                                        <TextInput id="m_role" className="mt-1 block w-full rounded-xl" value={memData.role_name} onChange={e => setMemData('role_name', e.target.value)} required />
+                                        <InputError message={memErrors.role_name} className="mt-1" />
+                                    </div>
+                                    <div>
+                                        <InputLabel htmlFor="m_div" value={`Divisi (${selectedPeriod?.name})`} />
+                                        <select id="m_div" className="mt-1 block w-full border-slate-200 rounded-xl shadow-sm focus:border-[#5B3E93] focus:ring-[#5B3E93]" value={memData.division_id} onChange={e => setMemData('division_id', e.target.value)} required>
+                                            <option value="">Pilih Divisi...</option>
+                                            {filteredDivisions.map(d => (
+                                                <option key={d.id} value={d.id}>{d.name}</option>
+                                            ))}
+                                        </select>
+                                        <InputError message={memErrors.division_id} className="mt-1" />
+                                    </div>
+                                    <div>
+                                        <InputLabel htmlFor="m_bio" value="Bio Singkat" />
+                                        <textarea id="m_bio" className="mt-1 block w-full border-slate-200 rounded-xl shadow-sm focus:border-[#5B3E93] focus:ring-[#5B3E93]" rows={2} value={memData.bio} onChange={e => setMemData('bio', e.target.value)} />
+                                    </div>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    <div>
+                                        <InputLabel value="Foto Profil" />
+                                        <p className="text-[11px] text-slate-500 mt-0.5">
+                                            Foto profil anggota. Disarankan proporsi potret (3:4).
+                                        </p>
+                                        <div className="mt-2 flex items-center gap-4">
+                                            <div 
+                                                className="group relative w-24 h-32 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center overflow-hidden shadow-sm shrink-0"
+                                            >
+                                                {memPhotoPreview ? (
+                                                    <img src={memPhotoPreview} className="w-full h-full object-cover" alt="Preview foto" />
+                                                ) : (
+                                                    <div className="flex flex-col items-center text-slate-400 p-2 text-center">
+                                                        <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                        </svg>
+                                                        <span className="text-[11px] font-medium leading-tight">Belum ada foto</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex flex-col gap-2">
+                                                <input 
+                                                    type="file" 
+                                                    ref={memPhotoRef} 
+                                                    onChange={handlePhotoFileChange} 
+                                                    className="hidden" 
+                                                    accept="image/*" 
+                                                />
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => memPhotoRef.current?.click()} 
+                                                    className="px-3.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm self-start"
+                                                >
+                                                    {memPhotoPreview ? 'Ganti Foto' : 'Upload Foto'}
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Position Sliders — only visible when photo is selected */}
+                                        {memPhotoPreview && (
+                                            <div className="mt-3 space-y-2.5 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                                <p className="text-[11px] font-semibold text-slate-500 flex items-center gap-1.5">
+                                                    <svg className="w-3.5 h-3.5 text-[#5B3E93]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                                    </svg>
+                                                    Atur Posisi Foto
+                                                </p>
+                                                {/* Horizontal Slider */}
+                                                <div>
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <label className="text-[11px] font-medium text-slate-500">← Horizontal →</label>
+                                                        <span className="text-[11px] font-bold text-[#5B3E93] tabular-nums">{memData.photo_position_x}%</span>
+                                                    </div>
+                                                    <input
+                                                        type="range"
+                                                        min={0}
+                                                        max={100}
+                                                        step={1}
+                                                        value={memData.photo_position_x}
+                                                        onChange={e => setMemData('photo_position_x', parseInt(e.target.value))}
+                                                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#5B3E93]"
+                                                    />
+                                                </div>
+                                                {/* Vertical Slider */}
+                                                <div>
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <label className="text-[11px] font-medium text-slate-500">↑ Vertikal ↓</label>
+                                                        <span className="text-[11px] font-bold text-[#5B3E93] tabular-nums">{memData.photo_position_y}%</span>
+                                                    </div>
+                                                    <input
+                                                        type="range"
+                                                        min={0}
+                                                        max={100}
+                                                        step={1}
+                                                        value={memData.photo_position_y}
+                                                        onChange={e => setMemData('photo_position_y', parseInt(e.target.value))}
+                                                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#5B3E93]"
+                                                    />
+                                                </div>
+                                                {/* Zoom Slider */}
+                                                <div>
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <label className="text-[11px] font-medium text-slate-500">🔍 Zoom Foto</label>
+                                                        <span className="text-[11px] font-bold text-[#5B3E93] tabular-nums">{memData.photo_zoom}%</span>
+                                                    </div>
+                                                    <input
+                                                        type="range"
+                                                        min={100}
+                                                        max={200}
+                                                        step={1}
+                                                        value={memData.photo_zoom}
+                                                        onChange={e => setMemData('photo_zoom', parseInt(e.target.value))}
+                                                        className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#5B3E93]"
+                                                    />
+                                                </div>
+                                                <p className="text-[10px] text-slate-400 leading-tight">Gunakan Zoom untuk memperbesar foto, lalu geser Horizontal/Vertikal untuk menentukan area fokus wajah/badan.</p>
+                                            </div>
+                                        )}
+
+                                        <InputError message={memErrors.photo} className="mt-1" />
+                                    </div>
+
+                                    <div>
+                                        <InputLabel htmlFor="m_ig" value="Instagram URL" />
+                                        <TextInput id="m_ig" className="mt-1 block w-full rounded-xl" value={memData.instagram_url} onChange={e => setMemData('instagram_url', e.target.value)} placeholder="https://..." />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <InputLabel htmlFor="m_sort" value="Urutan" />
+                                            <TextInput id="m_sort" type="number" className="mt-1 block w-full rounded-xl" value={memData.sort_order} onChange={e => setMemData('sort_order', parseInt(e.target.value))} />
+                                        </div>
+                                        <div className="flex items-center gap-2.5 mt-7">
+                                            <input type="checkbox" id="m_active" checked={memData.is_active} onChange={e => setMemData('is_active', e.target.checked)} className="rounded-lg border-slate-300 text-[#5B3E93] shadow-sm focus:border-[#5B3E93] focus:ring focus:ring-[#5B3E93]/20" />
+                                            <InputLabel htmlFor="m_active" value="Status Aktif" />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        
-                        <div className="space-y-4">
-                            <div>
-                                <InputLabel value="Foto Profil" />
-                                <div className="mt-2 flex flex-col gap-3">
-                                    <div className="w-32 h-32 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl flex items-center justify-center overflow-hidden">
-                                        {memPhotoPreview ? <img src={memPhotoPreview} className="w-full h-full object-cover" /> : <span className="text-xs text-slate-400">Pilih Foto</span>}
-                                    </div>
-                                    <input type="file" ref={memPhotoRef} onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) { setMemData('photo', file); setMemPhotoPreview(URL.createObjectURL(file)); }
-                                    }} className="hidden" accept="image/*" />
-                                    <button type="button" onClick={() => memPhotoRef.current?.click()} className="self-start px-3.5 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">Upload Foto</button>
+
+                        {/* Live Preview Section (Right side on desktop, bottom on mobile) */}
+                        <div className="w-full lg:w-[310px] shrink-0 flex flex-col items-center border-t lg:border-t-0 lg:border-l border-slate-100 pt-6 lg:pt-0 lg:pl-8">
+                            <div className="flex items-center justify-between w-full mb-2">
+                                <div className="flex items-center gap-2">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">Preview Tampilan Card</span>
                                 </div>
-                                <InputError message={memErrors.photo} className="mt-1" />
+                                <span className="text-[10px] font-semibold text-[#5B3E93] bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-full">
+                                    Real-Time
+                                </span>
                             </div>
-                            <div>
-                                <InputLabel htmlFor="m_ig" value="Instagram URL" />
-                                <TextInput id="m_ig" className="mt-1 block w-full rounded-xl" value={memData.instagram_url} onChange={e => setMemData('instagram_url', e.target.value)} placeholder="https://..." />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <InputLabel htmlFor="m_sort" value="Urutan" />
-                                    <TextInput id="m_sort" type="number" className="mt-1 block w-full rounded-xl" value={memData.sort_order} onChange={e => setMemData('sort_order', parseInt(e.target.value))} />
-                                </div>
-                                <div className="flex items-center gap-2.5 mt-7">
-                                    <input type="checkbox" id="m_active" checked={memData.is_active} onChange={e => setMemData('is_active', e.target.checked)} className="rounded-lg border-slate-300 text-[#5B3E93] shadow-sm focus:border-[#5B3E93] focus:ring focus:ring-[#5B3E93]/20" />
-                                    <InputLabel htmlFor="m_active" value="Status Aktif" />
-                                </div>
+                            <p className="text-[11px] text-slate-400 mb-4 w-full text-left">
+                                Tampilan kartu di halaman publik (hover untuk efek 3D flip).
+                            </p>
+                            <div className="w-full flex justify-center py-2">
+                                <FlipCard data={liveCardData} />
                             </div>
                         </div>
                     </div>
+
                     <div className="mt-8 flex justify-end gap-3 border-t border-slate-100 pt-4">
                         <button type="button" onClick={closeMemberModal} className="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">Batal</button>
                         <button type="submit" disabled={memProcessing} className="px-4 py-2 text-sm font-semibold text-white bg-[#5B3E93] hover:bg-[#4c337d] rounded-xl transition-colors shadow-sm disabled:opacity-50">Simpan Pengurus</button>

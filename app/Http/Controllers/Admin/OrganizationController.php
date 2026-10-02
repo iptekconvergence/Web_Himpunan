@@ -156,7 +156,10 @@ class OrganizationController extends Controller
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'instagram_url' => 'nullable|string|max:255',
             'sort_order' => 'nullable|integer',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'photo_position_x' => 'nullable|integer|min:0|max:100',
+            'photo_position_y' => 'nullable|integer|min:0|max:100',
+            'photo_zoom' => 'nullable|integer|min:100|max:200',
         ]);
 
         if ($request->hasFile('photo')) {
@@ -164,6 +167,10 @@ class OrganizationController extends Controller
             $data['photo_path'] = '/storage/' . $path;
         }
         unset($data['photo']);
+
+        $data['photo_position_x'] = $data['photo_position_x'] ?? 50;
+        $data['photo_position_y'] = $data['photo_position_y'] ?? 50;
+        $data['photo_zoom'] = $data['photo_zoom'] ?? 100;
 
         Member::create($data);
         return redirect()->back()->with('message', 'Anggota berhasil ditambahkan!');
@@ -185,7 +192,10 @@ class OrganizationController extends Controller
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'instagram_url' => 'nullable|string|max:255',
             'sort_order' => 'nullable|integer',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'photo_position_x' => 'nullable|integer|min:0|max:100',
+            'photo_position_y' => 'nullable|integer|min:0|max:100',
+            'photo_zoom' => 'nullable|integer|min:100|max:200',
         ]);
 
         if ($request->hasFile('photo')) {
@@ -196,6 +206,10 @@ class OrganizationController extends Controller
             $data['photo_path'] = '/storage/' . $path;
         }
         unset($data['photo']);
+
+        $data['photo_position_x'] = $data['photo_position_x'] ?? $member->photo_position_x;
+        $data['photo_position_y'] = $data['photo_position_y'] ?? $member->photo_position_y;
+        $data['photo_zoom'] = $data['photo_zoom'] ?? $member->photo_zoom ?? 100;
 
         $member->update($data);
         return redirect()->back()->with('message', 'Anggota berhasil diubah!');
