@@ -1,117 +1,187 @@
 import { Link, usePage } from '@inertiajs/react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
+import { Menu, X } from 'lucide-react';
 
 interface NavbarProps {
-    /** When true, the navbar starts transparent (for pages with dark hero backgrounds).
-     *  When false, the navbar always shows the solid/scrolled style. */
     transparent?: boolean;
-    /** Optional class names applied to the outermost fixed wrapper */
     wrapperClassName?: string;
 }
 
+const NAV_LINKS = [
+    { label: 'Home',    href: '/' },
+    { label: 'Periode', href: '/periode' },
+    { label: 'Berita',  href: '/berita' },
+    { label: 'Contact', href: '/#contact' },
+];
+
 export default function Navbar({ transparent = false, wrapperClassName = '' }: NavbarProps) {
-    const { auth, global_divisions, global_settings } = usePage<{ auth: { user: any }, global_divisions?: any[], global_settings?: Record<string, string> }>().props;
-    const [isScrolled, setIsScrolled] = useState(!transparent);
-    const [isVisible, setIsVisible] = useState(true);
-    const lastScrollY = useRef(typeof window !== 'undefined' ? window.scrollY : 0);
+    const { auth, global_settings } = usePage<{
+        auth: { user: any };
+        global_settings?: Record<string, string>;
+    }>().props;
+
+    const [scrolled, setScrolled] = useState(false);
+    const [drawerOpen, setDrawerOpen] = useState(false);
 
     useEffect(() => {
-        let ticking = false;
+        const onScroll = () => setScrolled(window.scrollY > 50);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
 
-        const handleScroll = () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    const currentScrollY = window.scrollY;
-                    
-                    if (transparent) {
-                        setIsScrolled(currentScrollY > 50);
-                    }
+    // Close drawer on route change (Inertia navigation)
+    const closeDrawer = () => setDrawerOpen(false);
 
-                    if (currentScrollY <= 50) {
-                        setIsVisible(true);
-                        lastScrollY.current = currentScrollY;
-                    } else {
-                        const delta = currentScrollY - lastScrollY.current;
-                        if (delta > 15) {
-                            setIsVisible(false);
-                            lastScrollY.current = currentScrollY;
-                        } else if (delta < -15) {
-                            setIsVisible(true);
-                            lastScrollY.current = currentScrollY;
-                        }
-                    }
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        };
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
 
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [transparent]);
+    const linkClass = (href: string) => {
+        const active = href === '/' ? currentPath === '/' : currentPath.startsWith(href.split('#')[0]) && href !== '/';
+        return [
+            'text-sm font-medium transition-colors duration-200',
+            active ? 'text-cyan-400' : 'text-slate-300 hover:text-white',
+        ].join(' ');
+    };
+
+    // Flat (top) vs floating (scrolled) styles
+    const navBase = 'transition-all duration-300 ease-in-out z-[100]';
+    const navFlat = 'fixed top-0 inset-x-0 px-6 py-3 bg-slate-900/80 backdrop-blur-md border-b border-slate-800';
+    const navFloat = 'fixed top-4 left-1/2 -translate-x-1/2 w-[92%] max-w-5xl px-5 py-2.5 rounded-full bg-slate-900/85 backdrop-blur-md border border-slate-800/80 shadow-lg shadow-black/30';
 
     return (
-        <div className={`fixed top-0 inset-x-0 z-50 pt-4 sm:pt-6 px-4 sm:px-6 lg:px-8 pointer-events-none ${wrapperClassName}`}>
-            <nav 
-                className={`pointer-events-auto relative mx-auto flex max-w-6xl items-center justify-between rounded-full px-6 py-3 transition-all duration-500 ease-in-out ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-[150%] opacity-0'} ${isScrolled ? 'bg-[#0f172a]/80 backdrop-blur-lg shadow-lg ring-1 ring-white/10 text-white' : 'bg-transparent ring-1 ring-white/20 backdrop-blur-md text-white'}`}
-            >
-                {/* Logo on the left */}
-                <div className="flex items-center gap-6">
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <ApplicationLogo 
+        <>
+            <nav className={`${navBase} ${scrolled ? navFloat : navFlat} ${wrapperClassName}`}>
+                <div className="flex items-center justify-between max-w-5xl mx-auto w-full">
+
+                    {/* ── Left: Logo ── */}
+                    <Link href="/" className="flex items-center gap-2.5 group shrink-0">
+                        <ApplicationLogo
                             src={global_settings?.logo || global_settings?.logo_url}
-                            className="h-10 w-auto transition-transform duration-300 group-hover:scale-105" 
+                            className="h-9 w-auto transition-transform duration-300 group-hover:scale-105"
                         />
-                        <div className="flex flex-col justify-center">
-                            <span className="font-extrabold text-lg leading-tight tracking-wide transition-colors text-white group-hover:text-cyan-300">
+                        <div className="flex flex-col leading-tight">
+                            <span className="font-semibold tracking-tight text-white text-sm group-hover:text-cyan-300 transition-colors">
                                 {global_settings?.site_name || 'HMPS MI'}
                             </span>
-                            <span className="text-xs font-semibold leading-tight tracking-wider uppercase text-cyan-50/70">
+                            <span className="text-[10px] text-slate-400 tracking-wide uppercase">
                                 {global_settings?.campus_name || 'Politeknik Negeri Medan'}
                             </span>
                         </div>
                     </Link>
-                </div>
 
-                {/* Navigation links & Auth buttons on the right */}
-                <div className="flex items-center gap-6 text-sm font-semibold tracking-wide">
-                    <div className="hidden md:flex gap-6 mr-2 items-center h-full text-white/90">
-                        <Link href="/" className="transition-colors hover:text-cyan-300">Home</Link>
-                        
-                        <Link href="/periode" className="transition-colors hover:text-cyan-300">
-                            Periode
-                        </Link>
-
-                        <Link href="/#Berita" className="transition-colors hover:text-cyan-300">Berita</Link>
-                        <Link href="/#contact" className="transition-colors hover:text-cyan-300">Contact</Link>
+                    {/* ── Center: Desktop nav ── */}
+                    <div className="hidden md:flex items-center gap-1">
+                        {NAV_LINKS.map(({ label, href }) => (
+                            <Link key={label} href={href} className={`${linkClass(href)} px-3 py-1.5 rounded-full hover:bg-slate-800/60`}>
+                                {label}
+                            </Link>
+                        ))}
                     </div>
 
-                    {auth.user ? (
-                        <Link
-                            href={route('dashboard')}
-                            className="rounded-full px-6 py-2.5 transition-all hover:shadow-lg focus:outline-none ring-1 bg-cyan-500/20 text-cyan-50 hover:bg-cyan-500/40 hover:shadow-cyan-500/20 ring-cyan-400/50"
+                    {/* ── Right: Auth + hamburger ── */}
+                    <div className="flex items-center gap-2">
+                        {auth.user ? (
+                            <Link
+                                href={route('dashboard')}
+                                className="hidden md:inline-flex items-center gap-1.5 text-sm font-medium text-slate-300 hover:text-white px-3 py-1.5 rounded-full hover:bg-slate-800/60 transition-colors"
+                            >
+                                Dashboard
+                            </Link>
+                        ) : (
+                            <div className="hidden md:flex items-center gap-2">
+                                <Link
+                                    href={route('login')}
+                                    className="text-sm font-medium text-slate-300 hover:text-white px-3 py-1.5 rounded-full hover:bg-slate-800/60 transition-colors"
+                                >
+                                    Masuk
+                                </Link>
+                                <Link
+                                    href={route('register')}
+                                    className="text-sm font-medium text-white px-4 py-1.5 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 hover:opacity-90 transition-opacity"
+                                >
+                                    Daftar
+                                </Link>
+                            </div>
+                        )}
+
+                        {/* Hamburger */}
+                        <button
+                            onClick={() => setDrawerOpen(true)}
+                            className="md:hidden p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
+                            aria-label="Buka menu"
                         >
-                            Dashboard
-                        </Link>
-                    ) : (
-                        <>
-                            <Link
-                                href={route('login')}
-                                className="transition-colors text-white/90 hover:text-cyan-300"
-                            >
-                                Log in
-                            </Link>
-                            <Link
-                                href={route('register')}
-                                className="rounded-full px-6 py-2.5 transition-all hover:shadow-lg focus:outline-none ring-1 bg-white/10 text-white hover:bg-white/20 hover:shadow-lg ring-white/30 backdrop-blur-md"
-                            >
-                                Register
-                            </Link>
-                        </>
-                    )}
+                            <Menu size={20} />
+                        </button>
+                    </div>
                 </div>
             </nav>
-        </div>
+
+            {/* ── Mobile Drawer ── */}
+            {drawerOpen && (
+                <>
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[110]"
+                        onClick={closeDrawer}
+                    />
+                    {/* Panel */}
+                    <div className="fixed top-4 left-4 right-4 z-[120] p-6 rounded-2xl bg-slate-900 border border-slate-800 shadow-2xl">
+                        <div className="flex items-center justify-between mb-5">
+                            <span className="font-semibold text-white text-sm">Menu</span>
+                            <button
+                                onClick={closeDrawer}
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                                aria-label="Tutup menu"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                            {NAV_LINKS.map(({ label, href }) => (
+                                <Link
+                                    key={label}
+                                    href={href}
+                                    onClick={closeDrawer}
+                                    className="text-sm font-medium text-slate-300 hover:text-white px-3 py-2.5 rounded-xl hover:bg-slate-800 transition-colors"
+                                >
+                                    {label}
+                                </Link>
+                            ))}
+
+                            <div className="mt-3 pt-3 border-t border-slate-800 flex flex-col gap-2">
+                                {auth.user ? (
+                                    <Link
+                                        href={route('dashboard')}
+                                        onClick={closeDrawer}
+                                        className="text-sm font-medium text-slate-300 hover:text-white px-3 py-2.5 rounded-xl hover:bg-slate-800 transition-colors"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                ) : (
+                                    <>
+                                        <Link
+                                            href={route('login')}
+                                            onClick={closeDrawer}
+                                            className="text-sm font-medium text-slate-300 hover:text-white px-3 py-2.5 rounded-xl hover:bg-slate-800 transition-colors"
+                                        >
+                                            Masuk
+                                        </Link>
+                                        <Link
+                                            href={route('register')}
+                                            onClick={closeDrawer}
+                                            className="text-sm font-medium text-white text-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:opacity-90 transition-opacity"
+                                        >
+                                            Daftar
+                                        </Link>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+        </>
     );
 }
