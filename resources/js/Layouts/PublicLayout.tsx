@@ -30,7 +30,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
 
             <Navbar transparent={false} />
 
-            <main className="pt-24 pb-16 min-h-[calc(100vh-350px)]">
+            <main className="pt-16 pb-16 min-h-[calc(100vh-350px)]">
                 {children}
             </main>
 
@@ -76,7 +76,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                 )}
                             </div>
                         </div>
-                        <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
+                        <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
                                 {(() => {
                                     const groups = global_footer_links || [];
                                     const midpoint = Math.ceil(groups.length / 2);

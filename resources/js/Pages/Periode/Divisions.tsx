@@ -46,7 +46,7 @@ export default function PeriodDivisions({
 
                 <Navbar transparent={false} />
 
-                <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-28 pt-4">
+                <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20">
                     {/* Breadcrumb Navigation */}
                     <nav className="flex items-center gap-2 text-sm text-slate-400 mb-8">
                         <Link href="/periode" className="hover:text-cyan-400 font-medium transition-colors">

@@ -35,7 +35,7 @@ export default function StrukturOrganisasi({
                 {/* Same Navbar as Landing Page - solid style for white bg pages */}
                 <Navbar transparent={false} />
 
-                <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-28 pt-4">
+                <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20">
                     {/* Section Title */}
                     <div className="text-center mb-16">
                         <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">

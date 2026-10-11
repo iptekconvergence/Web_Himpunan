@@ -197,7 +197,7 @@ html {
 }
 
 /* Make all page content sit above the fixed bg */
-.futuristic-page > *:not(.bg-canvas) {
+.futuristic-page > *:not(.bg-canvas):not(nav) {
     position: relative;
     z-index: 1;
 }

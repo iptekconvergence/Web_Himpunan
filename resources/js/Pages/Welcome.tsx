@@ -105,13 +105,10 @@ export default function Welcome({
                 </div>
 
                 {/* Navigation */}
-                <Navbar 
-                    transparent={true} 
-                    wrapperClassName={`transition-all duration-700 ease-out ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}
-                />
+                <Navbar transparent={false} />
 
                 {/* Hero Section */}
-                <section id="home" className="relative flex min-h-screen items-center justify-center overflow-hidden bg-transparent pt-24 pb-24">
+                <section id="home" className="relative flex min-h-screen items-center justify-center overflow-hidden bg-transparent pt-16 pb-24 sm:pt-20">
                     {/* Background decorations (Removed white shadows for cleaner look) */}
                     <div className="mx-auto max-w-7xl px-6 lg:px-8 z-10 w-full">
                         <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-center">
@@ -279,7 +276,7 @@ export default function Welcome({
                         </div>
 
                         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-                            <div className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-8 lg:max-w-none lg:grid-cols-3">
+                            <div className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-2 lg:max-w-none lg:grid-cols-3">
                                 {divisions.map((divisi, index) => (
                                     <div key={divisi.id} style={{ transitionDelay: `${200 + (index * 150)}ms` }} className={`transition-all duration-700 ease-out ${divisiInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
                                         <Link href={activePeriod ? `/periode/${activePeriod.id}/divisi/${divisi.id}` : `/periode`} className="group relative bg-white/5 backdrop-blur-md p-8 rounded-3xl shadow-lg ring-1 ring-white/10 hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-1 block h-full">
@@ -380,7 +377,7 @@ export default function Welcome({
                             </p>
                         </div>
                         
-                        <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-4">
+                        <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 sm:mt-20 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-4">
                             {[
                                 ...(settings.email ? [{
                                     name: 'Email Support',
@@ -468,7 +465,7 @@ export default function Welcome({
                                     )}
                                 </div>
                             </div>
-                            <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
+                            <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
                                 {(() => {
                                     const groups = global_footer_links || [];
                                     const midpoint = Math.ceil(groups.length / 2);

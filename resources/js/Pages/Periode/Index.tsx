@@ -38,7 +38,7 @@ export default function PeriodIndex({
 
                 <Navbar transparent={false} />
 
-                <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-28 pt-4">
+                <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20">
                     {/* Header Section */}
                     <div className="text-center max-w-3xl mx-auto mb-16">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-900/60 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-4 border border-indigo-500/30">
