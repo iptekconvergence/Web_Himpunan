@@ -148,13 +148,6 @@ export default function Login({
                         {processing ? 'Memproses…' : 'Masuk'}
                     </button>
                 </form>
-
-                <p className="mt-6 text-center text-sm text-slate-500">
-                    Belum punya akun?{' '}
-                    <Link href={route('register')} className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors">
-                        Daftar
-                    </Link>
-                </p>
             </div>
         </GuestLayout>
     );

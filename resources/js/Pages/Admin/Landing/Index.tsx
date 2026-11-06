@@ -195,7 +195,7 @@ export default function LandingIndex({ settings, missions, flash }: Props) {
                             <InputLabel value="Tombol 1 (Teks & Link)" />
                             <div className="flex gap-2 mt-1">
                                 <TextInput className="w-1/2" placeholder="Teks" value={heroData.hero_btn1_text} onChange={e => setHeroData('hero_btn1_text', e.target.value)} />
-                                <TextInput className="w-1/2" placeholder="Link (e.g. /register)" value={heroData.hero_btn1_link} onChange={e => setHeroData('hero_btn1_link', e.target.value)} />
+                                <TextInput className="w-1/2" placeholder="Link (e.g. /periode)" value={heroData.hero_btn1_link} onChange={e => setHeroData('hero_btn1_link', e.target.value)} />
                             </div>
                         </div>
                         <div>
