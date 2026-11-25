@@ -26,9 +26,14 @@ export interface FlipCardProps {
 }
 
 export const FlipCard = React.memo(function FlipCard({ data }: FlipCardProps) {
-  const posX = data.photoPositionX ?? 50;
-  const posY = data.photoPositionY ?? 50;
-  const zoom = data.photoZoom ?? 100;
+  const zoom = (data.photoZoom ?? 100) / 100;
+  const x = data.photoPositionX ?? 50;
+  const y = data.photoPositionY ?? 50;
+
+  // ruang geser maksimum = (zoom - 1) / 2 dari lebar/tinggi frame
+  const maxShift = ((zoom - 1) / 2) * 100;
+  const translateX = ((50 - x) / 50) * maxShift;
+  const translateY = ((50 - y) / 50) * maxShift;
 
   return (
     <div className="group h-[380px] w-full max-w-[300px] [perspective:1000px] mx-auto cursor-pointer">
@@ -73,9 +78,8 @@ export const FlipCard = React.memo(function FlipCard({ data }: FlipCardProps) {
                 alt={data.name} 
                 className="absolute bottom-0 h-[270px] w-auto max-w-full object-contain object-bottom drop-shadow-[0_10px_20px_rgba(0,0,0,0.7)] z-20 pointer-events-none"
                 style={{ 
-                  objectPosition: `${posX}% ${posY}%`,
-                  transform: `scale(${zoom / 100})`,
-                  transformOrigin: 'bottom center'
+                  transform: `translate(${translateX}%, ${translateY}%) scale(${zoom})`,
+                  transformOrigin: 'center'
                 }}
               />
               {/* Glass highlight at the bottom edge */}
